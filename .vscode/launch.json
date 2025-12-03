@@ -17,13 +17,10 @@
                 }
             ],
             "args": [
-                "1",
+                "2",
                 "--sample"
             ],
             "sourceFileMap": {},
-            "osx": {
-                "MIMode": "lldb"
-            }
         }
     ]
 }
