@@ -3,7 +3,7 @@ use std::io::{BufRead, BufReader};
 
 fn runner<F>(filename: &str, f: F)
 where
-    F: Fn(i32, i32, i32) -> (i32, i32),
+    F: Fn(i32, i32, i32) -> i32,
 {
     let file = File::open(filename).unwrap();
     let reader = BufReader::new(file);
@@ -21,9 +21,8 @@ where
         };
         let amount: i32 = line.trim()[1..].parse().unwrap();
 
-        let (new_val, count_change) = f(val, direction, amount);
-        val = new_val;
-        count += count_change;
+        count += f(val, direction, amount);
+        val = (((val + direction * amount) % 100) + 100) % 100;
     }
 
     println!("{}", count);
@@ -32,27 +31,39 @@ where
 pub fn day1(filename: &str) {
     println!("Filename: {}", filename);
 
-    let part1 = |val: i32, direction: i32, amount: i32| -> (i32, i32) {
-        let val2 = (val + direction * amount) % 100;
-
-        return (val2, if val == 0 { 1 } else { 0 });
+    let part1 = |val: i32, direction: i32, amount: i32| -> i32 {
+        return if (val + direction * amount) % 100 == 0 {
+            1
+        } else {
+            0
+        };
     };
 
-    let part2 = |val: i32, direction: i32, amount: i32| -> (i32, i32) {
-        let mut new_val = val + direction * amount;
-        // TODO this behavior is different in rust: -18/100 = 0, not -1 as in Python. So figure out
-        // how to handle that gracefully and adjust our adjustments below
-        let mut cross_times = ((new_val / 100) - (val / 100)).abs();
-        new_val %= 100;
+    let part2 = |val: i32, direction: i32, amount: i32| -> i32 {
+        let new_val = val + direction * amount;
+        /*
+        new_val | val = 0   | val != 0  | new_val / 100
+        -250    | 2         | 3         | -2
+        -200    | 2         | 3         | -2
+        -150    | 1         | 2         | -1
+        -100    | 1         | 2         | -1
+        -50     | 0         | 1         | 0
 
-        if new_val == 0 && direction == -1 {
-            // If we land at 0 and we were direction == -1, then we need to add 1 to cross_times
-            cross_times += 1;
-        } else if val == 0 && direction == -1 {
-            cross_times -= 1;
-        }
+        0       | 0         | 1         | 0
 
-        return (new_val, cross_times);
+        50      | 0         | 0         | 0
+        100     | 1         | 1         | 1
+        150     | 1         | 1         | 1
+        200     | 2         | 2         | 2
+        250     | 2         | 2         | 2
+        */
+        return if new_val > 0 {
+            new_val / 100
+        } else if new_val == 0 {
+            if val == 0 { 0 } else { 1 }
+        } else {
+            -(new_val / 100) + (if val == 0 { 0 } else { 1 })
+        };
     };
 
     runner(filename, part1);
