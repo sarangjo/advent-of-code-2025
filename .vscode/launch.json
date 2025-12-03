@@ -1,0 +1,29 @@
+{
+    "configurations": [
+        {
+            "type": "cppvsdbg",
+            "request": "launch",
+            "name": "run advent-of-code-2025",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}\\target\\debug\\advent-of-code-2025.exe",
+            "environment": [
+                {
+                    "name": "RUST_BACKTRACE",
+                    "value": "short"
+                },
+                {
+                    "name": "RUSTC_TOOLCHAIN",
+                    "value": "C:\\Users\\saran\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc"
+                }
+            ],
+            "args": [
+                "1",
+                "--sample"
+            ],
+            "sourceFileMap": {},
+            "osx": {
+                "MIMode": "lldb"
+            }
+        }
+    ]
+}
