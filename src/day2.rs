@@ -68,3 +68,35 @@ pub fn day2(filename: &str) {
 
     println!("{}", total);
 }
+
+pub fn day2_pt2(filename: &str) {
+    let content = fs::read_to_string(filename).unwrap();
+
+    let mut total = 0;
+
+    for range_str in content.split(',') {
+        let mut range = range_str.split('-');
+
+        println!("range_str: {}", range_str);
+
+        let start = range.next().unwrap().trim();
+        let end = range.next().unwrap().trim();
+
+        // Go by length. We start with start's length and evaluate which possible repeats it could have
+        // and continue until we cross end. Then repeat for each possible repeat breakdown.
+
+        // 99
+        let mut full_len = start.len();
+
+        for piece_len in 1..full_len / 2 {
+            if full_len % piece_len != 0 {
+                continue;
+            }
+
+            // Pick the prefex of length `piece_len` and find the best one according to start
+            let base = 0;
+        }
+    }
+
+    println!("{}", total);
+}
