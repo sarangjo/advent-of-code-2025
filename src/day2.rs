@@ -1,12 +1,17 @@
 use std::fs;
 
+pub fn day2(filename: &str) {
+    part1(filename);
+    part2(filename);
+}
+
 fn compute_possible(base: i64, half_len: u32) -> i64 {
     let possible = base * 10_i64.pow(half_len) + base;
     // println!("possible {}", possible);
     return possible;
 }
 
-pub fn day2(filename: &str) {
+fn part1(filename: &str) {
     let content = fs::read_to_string(filename).unwrap();
 
     let mut total = 0;
@@ -69,7 +74,8 @@ pub fn day2(filename: &str) {
     println!("{}", total);
 }
 
-pub fn day2_pt2(filename: &str) {
+fn part2(filename: &str) {
+    /*
     let content = fs::read_to_string(filename).unwrap();
 
     let mut total = 0;
@@ -82,21 +88,42 @@ pub fn day2_pt2(filename: &str) {
         let start = range.next().unwrap().trim();
         let end = range.next().unwrap().trim();
 
+        let start_num: i32 = start.parse().unwrap();
+        let end_num: i32 = start.parse().unwrap();
+
         // Go by length. We start with start's length and evaluate which possible repeats it could have
         // and continue until we cross end. Then repeat for each possible repeat breakdown.
 
-        // 99
-        let mut full_len = start.len();
+        // 999
+        let mut full_len = start.len(); // 3
 
-        for piece_len in 1..full_len / 2 {
+        // Highest possible piece is full_len/2 (splitting into two pieces)
+        for piece_len in 1..(full_len / 2 + 1) {
+            // Only look for real divisions
             if full_len % piece_len != 0 {
                 continue;
             }
 
             // Pick the prefex of length `piece_len` and find the best one according to start
-            let base = 0;
+            // e.g. piece_len = 1
+            // base = 9
+            let base = &start[..piece_len];
+
+            let construct_num = |base| {
+                let mut _n = String::new();
+                for _ in 1..(full_len / piece_len) {
+                    _n += base;
+                }
+                return _n.parse::<i32>().unwrap();
+            };
+
+            let num = construct_num(base);
+            while num < start_num {
+                num = 0;
+            }
         }
     }
 
     println!("{}", total);
+    */
 }
