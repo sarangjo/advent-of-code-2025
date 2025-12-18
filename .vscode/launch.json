@@ -18,9 +18,9 @@
             ],
             "args": [
                 "2",
-                "--sample"
             ],
             "sourceFileMap": {},
+            "preLaunchTask": "${defaultBuildTask}"
         }
     ]
 }

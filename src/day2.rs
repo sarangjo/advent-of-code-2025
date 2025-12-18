@@ -1,4 +1,4 @@
-use std::fs;
+use std::{collections::HashSet, fs};
 
 pub fn day2(filename: &str) {
     part1(filename);
@@ -75,57 +75,92 @@ fn part1(filename: &str) {
 }
 
 fn part2(filename: &str) {
+    let construct_num = |base: i64, piece_count: u32| {
+        let num_str = (1..piece_count + 1)
+            .map(|_| base.to_string())
+            .collect::<String>();
+        let res = num_str.parse::<i64>();
+        match res {
+            Ok(ans) => ans,
+            Err(err) => {
+                println!("Encountered parse error for {}... why?", err);
+                -1
+            }
+        }
+    };
+
     let content = fs::read_to_string(filename).unwrap();
 
     let mut total = 0;
 
     for range_str in content.split(',') {
         let mut range = range_str.split('-');
-
-        println!("current range: {}", range_str);
+        let mut solutions = HashSet::new();
 
         let start = range.next().unwrap().trim();
         let end = range.next().unwrap().trim();
 
-        let start_num: i32 = start.parse().unwrap();
-        let end_num: i32 = start.parse().unwrap();
+        println!(">> current range: {}-{} <<", start, end);
 
-        // Go by length. We start with start's length and evaluate which possible repeats it could have
-        // and continue until we cross end. Then repeat for each possible repeat breakdown.
-
-        // 999
-        let full_len = start.len(); // 3
+        // as numbers
+        let start_num: i64 = start.parse().unwrap();
+        let end_num: i64 = end.parse().unwrap();
 
         // Highest possible piece length is full_len/2 (splitting into two pieces, piece_count=2)
-        for piece_len in 1..(full_len / 2 + 1) {
-            // Only look for real divisions
-            if full_len % piece_len != 0 {
-                continue;
-            }
-            let piece_count = full_len / piece_len;
+        // +1 because the range we want is [1, end.len()/2] which is equivalent to [1, end.len()/2+1)
+        for piece_len in 1..(end.len() / 2 + 1) {
+            let min_piece_count =
+                (((start.len() as f32) / (piece_len as f32)) as f32).ceil() as u32;
+            let max_piece_count = (((end.len() as f32) / (piece_len as f32)) as f32).ceil() as u32;
 
-            // Pick the prefex of length `piece_len` and find the best one according to start
-            // e.g. piece_len = 1
-            // base = 9
-            let mut base: i32 = start[..piece_len].parse().unwrap();
+            let base_max = 10_i64.pow(piece_len as u32);
 
-            // Construct the number by repeating `base` `piece_count` times
-            let construct_num = |base: i32| {
-                let mut _n = String::new();
-                for _ in 1..piece_count {
-                    _n += base.to_string().as_str();
+            for piece_count in min_piece_count..max_piece_count + 1 {
+                // Has to repeat at least twice
+                if piece_count == 1 {
+                    continue;
                 }
-                return _n.parse::<i32>().unwrap();
-            };
 
-            let mut num = construct_num(base);
-            // Now we have our possible number that is a repeat of the piece. It's possible
-            // that this is smaller than our actual number, e.g. the full number is 488 but num is
-            // 444. So we keep reconstructing our number by bumping base until we get to a value that's
-            // larger than start
-            while num < start_num {
-                base += 1;
+                // Pick the prefex of length `piece_len` and find the best one according to start
+                // e.g. piece_len = 1
+                // base = 4
+                let mut base: i64 = 10_i64.pow(piece_len as u32 - 1);
+
+                /*  if start.len() % piece_len == 0 {
+                    // start[..piece_len].parse().unwrap()
+                } else {
+                };*/
+
+                let mut num = construct_num(base, piece_count);
+                // Now we have our possible number that is a repeat of the piece. It's possible
+                // that this is smaller than our actual number, e.g. the full number is 488 but num is
+                // 444. So we keep reconstructing our number by bumping base until we get to a value that's
+                // larger than start
+                while num < start_num {
+                    base += 1;
+                    if base == base_max {
+                        break;
+                    }
+                    num = construct_num(base, piece_count);
+                }
+
+                while num <= end_num {
+                    if solutions.insert(num) {
+                        println!("Found: {} (piece_len {})", num, piece_len);
+                    }
+
+                    base += 1;
+                    if base == base_max {
+                        break;
+                    }
+                    num = construct_num(base, piece_count);
+                }
             }
+        }
+
+        // Add to total
+        for sol in &solutions {
+            total += sol;
         }
     }
 
