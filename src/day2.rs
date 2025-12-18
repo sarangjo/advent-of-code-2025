@@ -75,7 +75,6 @@ fn part1(filename: &str) {
 }
 
 fn part2(filename: &str) {
-    /*
     let content = fs::read_to_string(filename).unwrap();
 
     let mut total = 0;
@@ -83,7 +82,7 @@ fn part2(filename: &str) {
     for range_str in content.split(',') {
         let mut range = range_str.split('-');
 
-        println!("range_str: {}", range_str);
+        println!("current range: {}", range_str);
 
         let start = range.next().unwrap().trim();
         let end = range.next().unwrap().trim();
@@ -95,35 +94,40 @@ fn part2(filename: &str) {
         // and continue until we cross end. Then repeat for each possible repeat breakdown.
 
         // 999
-        let mut full_len = start.len(); // 3
+        let full_len = start.len(); // 3
 
-        // Highest possible piece is full_len/2 (splitting into two pieces)
+        // Highest possible piece length is full_len/2 (splitting into two pieces, piece_count=2)
         for piece_len in 1..(full_len / 2 + 1) {
             // Only look for real divisions
             if full_len % piece_len != 0 {
                 continue;
             }
+            let piece_count = full_len / piece_len;
 
             // Pick the prefex of length `piece_len` and find the best one according to start
             // e.g. piece_len = 1
             // base = 9
-            let base = &start[..piece_len];
+            let mut base: i32 = start[..piece_len].parse().unwrap();
 
-            let construct_num = |base| {
+            // Construct the number by repeating `base` `piece_count` times
+            let construct_num = |base: i32| {
                 let mut _n = String::new();
-                for _ in 1..(full_len / piece_len) {
-                    _n += base;
+                for _ in 1..piece_count {
+                    _n += base.to_string().as_str();
                 }
                 return _n.parse::<i32>().unwrap();
             };
 
-            let num = construct_num(base);
+            let mut num = construct_num(base);
+            // Now we have our possible number that is a repeat of the piece. It's possible
+            // that this is smaller than our actual number, e.g. the full number is 488 but num is
+            // 444. So we keep reconstructing our number by bumping base until we get to a value that's
+            // larger than start
             while num < start_num {
-                num = 0;
+                base += 1;
             }
         }
     }
 
     println!("{}", total);
-    */
 }
