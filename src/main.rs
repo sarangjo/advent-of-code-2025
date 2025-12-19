@@ -1,9 +1,11 @@
 use crate::day1::day1;
 use crate::day2::day2;
+use crate::day3::day3;
 use std::env;
 
 pub mod day1;
 pub mod day2;
+pub mod day3;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -22,5 +24,7 @@ fn main() {
         day1(&filename);
     } else if day == 2 {
         day2(&filename);
+    } else if day == 3 {
+        day3(&filename);
     }
 }
