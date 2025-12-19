@@ -5,6 +5,7 @@ use std::{
 
 pub fn day3(filename: &str) {
     part1(filename);
+    part2(filename);
 }
 
 fn part1(filename: &str) {
@@ -53,46 +54,40 @@ fn part1(filename: &str) {
     println!("total: {}", total);
 }
 
-fn part2() {
+fn part2(filename: &str) {
+    let file = File::open(filename).unwrap();
+    let reader = BufReader::new(file);
+
     let mut total: i64 = 0;
+    for line_result in reader.lines() {
+        let line = line_result.unwrap();
 
-    let lines = file.split('\n');
+        let line_as_nums: Vec<i64> = line
+            .chars()
+            .map(|c| c.to_digit(10).unwrap() as i64)
+            .collect();
 
-    for line in lines {
-    // for line_result in reader.lines() {
-        // let line = line_result.unwrap();
-        
-        let line_as_nums: Vec<i64> = line.chars().map(|c| c.to_digit(10).unwrap() as i64).collect();
-        
-        println!("line_as_nums {:?}", line_as_nums);
-        
         let mut nums = [0_i64; 12];
-        
+
         let mut last_idx: i32 = -1;
         for i in 0..12 {
-            println!("i {}", i);
             let mut cur_best: i64 = -1;
-            for j in ((last_idx+1) as usize)..line_as_nums.len() - 12 + i + 1 {
-                println!("j {}", j);
+            for j in ((last_idx + 1) as usize)..line_as_nums.len() - 12 + i + 1 {
                 if line_as_nums[j] > cur_best {
-                    println!("setting last_idx to {} and cur_best to {}", j, line_as_nums[j]);
                     last_idx = j as i32;
                     cur_best = line_as_nums[j];
                 }
             }
             nums[i] = cur_best;
         }
-        
+
         let mut num_str = String::new();
         for digit in nums {
             num_str += &digit.to_string();
         }
         let num: i64 = num_str.parse().unwrap();
-        
-        println!("num {:?}", num);
+
         total += num;
-        
-        break;
     }
 
     println!("total: {}", total);
