@@ -54,22 +54,24 @@ fn part1(filename: &str) {
 }
 
 fn part2() {
-    let total = 0;
+    let mut total: i64 = 0;
 
+    let lines = file.split('\n');
+
+    for line in lines {
     // for line_result in reader.lines() {
         // let line = line_result.unwrap();
-        let line = String::from("234234234234278");
         
-        let line_as_nums: Vec<i32> = line.chars().map(|c| c.to_digit(10).unwrap() as i32).collect();
+        let line_as_nums: Vec<i64> = line.chars().map(|c| c.to_digit(10).unwrap() as i64).collect();
         
         println!("line_as_nums {:?}", line_as_nums);
         
-        let mut nums = [0; 12];
+        let mut nums = [0_i64; 12];
         
         let mut last_idx: i32 = -1;
         for i in 0..12 {
             println!("i {}", i);
-            let mut cur_best = -1;
+            let mut cur_best: i64 = -1;
             for j in ((last_idx+1) as usize)..line_as_nums.len() - 12 + i + 1 {
                 println!("j {}", j);
                 if line_as_nums[j] > cur_best {
@@ -81,8 +83,17 @@ fn part2() {
             nums[i] = cur_best;
         }
         
-        println!("nums {:?}", nums);
-    // }
+        let mut num_str = String::new();
+        for digit in nums {
+            num_str += &digit.to_string();
+        }
+        let num: i64 = num_str.parse().unwrap();
+        
+        println!("num {:?}", num);
+        total += num;
+        
+        break;
+    }
 
     println!("total: {}", total);
 }
