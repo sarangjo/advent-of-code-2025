@@ -2,6 +2,7 @@ use std::fs;
 
 pub fn day4(filename: &str) {
     part1(filename);
+    part2(filename);
 }
 
 #[derive(Debug)]
@@ -68,22 +69,51 @@ impl Grid {
         }
         count
     }
+
+    fn open_roll_count(&mut self) -> u32 {
+        let mut total = 0_u32;
+
+        let mut new_chars: Vec<Vec<char>> = Vec::with_capacity(self.height() as usize);
+
+        for i in 0..self.height() {
+            let mut row: Vec<char> = Vec::with_capacity(self.width() as usize);
+            for j in 0..self.width() {
+                if self.get(i, j) == '@' && self.neightbor_count(i, j) < 4 {
+                    total += 1;
+                    row.push('.');
+                } else {
+                    row.push(self.get(i, j));
+                }
+            }
+            new_chars.push(row);
+        }
+
+        self.chars = new_chars;
+
+        return total;
+    }
 }
 
 fn part1(filename: &str) {
     let content = fs::read_to_string(filename).unwrap();
 
-    let grid = Grid::from_str(&content);
+    let mut grid = Grid::from_str(&content);
+
+    println!("total: {}", grid.open_roll_count());
+}
+
+fn part2(filename: &str) {
+    let content = fs::read_to_string(filename).unwrap();
+    let mut grid = Grid::from_str(&content);
 
     let mut total = 0_u32;
 
-    for i in 0..grid.height() {
-        for j in 0..grid.width() {
-            if grid.get(i, j) == '@' && grid.neightbor_count(i, j) < 4 {
-                println!("i {} j {}", i, j);
-                total += 1;
-            }
+    loop {
+        let cur_total = grid.open_roll_count();
+        if cur_total == 0 {
+            break;
         }
+        total += cur_total;
     }
 
     println!("total: {}", total);
