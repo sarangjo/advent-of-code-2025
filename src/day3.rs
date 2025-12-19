@@ -52,3 +52,37 @@ fn part1(filename: &str) {
 
     println!("total: {}", total);
 }
+
+fn part2() {
+    let total = 0;
+
+    // for line_result in reader.lines() {
+        // let line = line_result.unwrap();
+        let line = String::from("234234234234278");
+        
+        let line_as_nums: Vec<i32> = line.chars().map(|c| c.to_digit(10).unwrap() as i32).collect();
+        
+        println!("line_as_nums {:?}", line_as_nums);
+        
+        let mut nums = [0; 12];
+        
+        let mut last_idx: i32 = -1;
+        for i in 0..12 {
+            println!("i {}", i);
+            let mut cur_best = -1;
+            for j in ((last_idx+1) as usize)..line_as_nums.len() - 12 + i + 1 {
+                println!("j {}", j);
+                if line_as_nums[j] > cur_best {
+                    println!("setting last_idx to {} and cur_best to {}", j, line_as_nums[j]);
+                    last_idx = j as i32;
+                    cur_best = line_as_nums[j];
+                }
+            }
+            nums[i] = cur_best;
+        }
+        
+        println!("nums {:?}", nums);
+    // }
+
+    println!("total: {}", total);
+}
