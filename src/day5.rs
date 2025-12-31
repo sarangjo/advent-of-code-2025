@@ -4,6 +4,7 @@ use std::{
 };
 
 pub fn day5(filename: &str) {
+    part1(filename);
     part2(filename);
 }
 
@@ -52,7 +53,7 @@ impl Ranges {
                     self.ranges.remove(i + 1);
                 }
             }
-            if new_range.0 > self.ranges[i].0 && new_range.0 <= self.ranges[i].1 {
+            if new_range.0 >= self.ranges[i].0 && new_range.0 <= self.ranges[i].1 {
                 if new_range.1 <= self.ranges[i].1 {
                     // fully subsumed
                     return;
@@ -153,45 +154,4 @@ fn part2(filename: &str) {
     let total: u64 = ranges.ranges.iter().map(|r| r.1 - r.0 + 1).sum();
 
     println!("total: {}", total);
-}
-
-fn create_ranges() -> Ranges {
-    // Starting point
-    let mut ranges = Ranges::new();
-    ranges.add_range((5, 15));
-    ranges.add_range((25, 35));
-    ranges.add_range((45, 55));
-    ranges
-}
-
-fn test() {
-    for (i, r) in vec![
-        (0, 2),
-        (2, 7),
-        (2, 17),
-        (2, 27),
-        (2, 60),
-        (8, 13),
-        (3, 15),
-        (4, 25),
-        (8, 18),
-        (8, 28),
-        (8, 38),
-        (8, 58),
-        (15, 25),
-        (15, 35),
-        (15, 50),
-        (18, 28),
-        (18, 35),
-        (18, 38),
-        (18, 58),
-        (60, 200000),
-    ]
-    .iter()
-    .enumerate()
-    {
-        let mut ranges = create_ranges();
-        ranges.add_range(*r);
-        println!("test {}, r {:?}, vec {:?}", 1 + i, r, ranges.ranges);
-    }
 }
