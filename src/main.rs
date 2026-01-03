@@ -24,7 +24,8 @@ fn main() {
     }
 
     let day: i32 = args[1].parse().unwrap();
-    let filename = if args.len() == 3 && args[2] == "--sample" {
+    let is_sample = args.len() == 3 && args[2] == "--sample";
+    let filename = if is_sample {
         format!("sample{}.txt", day)
     } else {
         format!("day{}.txt", day)
@@ -45,6 +46,6 @@ fn main() {
     } else if day == 7 {
         day7(&filename);
     } else if day == 8 {
-        day8(&filename);
+        day8(&filename, is_sample);
     }
 }

@@ -1,12 +1,12 @@
 use std::{
     cmp::Reverse,
-    collections::{BinaryHeap, HashSet, hash_set},
+    collections::{BinaryHeap, HashSet},
     fmt::Debug,
     fs::File,
     io::{BufRead, BufReader},
 };
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, Hash)]
 struct Point(i64, i64, i64);
 
 impl Point {
@@ -20,10 +20,18 @@ impl Point {
     }
 }
 
-#[derive(Debug)]
-struct PointPair<'a>(&'a Point, &'a Point);
+impl PartialEq for Point {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0 && self.1 == other.1 && self.2 == other.2
+    }
+}
 
-impl PointPair<'_> {
+impl Eq for Point {}
+
+#[derive(Debug, Clone, Copy)]
+struct PointPair(Point, Point);
+
+impl PointPair {
     fn distance(self: &Self) -> f64 {
         (((self.0.0 - self.1.0).pow(2)
             + (self.0.1 - self.1.1).pow(2)
@@ -32,75 +40,124 @@ impl PointPair<'_> {
     }
 }
 
-impl Ord for PointPair<'_> {
+impl Ord for PointPair {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        // Backwards because we want reverse ordering for the max BinaryHeap
-        // other.distance().total_cmp(&self.distance())
         self.distance().total_cmp(&other.distance())
-
-        // if distance < 0_f64 {
-        //     std::cmp::Ordering::Less
-        // } else if distance > 0_f64 {
-        //     std::cmp::Ord
-        // }
     }
 }
 
-impl PartialOrd for PointPair<'_> {
+impl PartialOrd for PointPair {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl PartialEq for PointPair<'_> {
+impl PartialEq for PointPair {
     fn eq(&self, other: &Self) -> bool {
         self.distance() == other.distance()
     }
 }
 
-impl Eq for PointPair<'_> {}
+impl Eq for PointPair {}
 
-fn part1(filename: &str) {
-    let points: Vec<Point> = BufReader::new(File::open(filename).unwrap())
-        .lines()
-        .map(|l| Point::from(&l.unwrap()))
-        .collect();
+struct Playground {
+    points: Vec<Point>,
+    // TODO need Reverse?
+    best_pairs: BinaryHeap<Reverse<PointPair>>,
+    circuits: Vec<HashSet<Point>>,
+}
 
-    let mut best_pairs = BinaryHeap::new();
+impl Playground {
+    fn new(filename: &str) -> Self {
+        let mut playground = Self {
+            points: BufReader::new(File::open(filename).unwrap())
+                .lines()
+                .map(|l| Point::from(&l.unwrap()))
+                .collect(),
+            best_pairs: BinaryHeap::new(),
+            circuits: Vec::new(),
+        };
 
-    // Collect points by pairs
-    for i in 0..points.len() {
-        for j in (i + 1)..points.len() {
-            best_pairs.push(Reverse(PointPair(&points[i], &points[j])));
+        // Collect points by pairs
+        for i in 0..playground.points.len() {
+            for j in (i + 1)..playground.points.len() {
+                playground.best_pairs.push(Reverse(PointPair(
+                    playground.points[i],
+                    playground.points[j],
+                )));
+            }
         }
+
+        // Now we can start building circuits
+        for p in &playground.points {
+            playground.circuits.push(HashSet::from([p.clone()]));
+        }
+
+        playground
     }
 
-    // Now we can start building circuits
-    // TODO: start circuits with all points to begin with, and merge in the for loop instead of just
-    // adding
-    let mut circuits: Vec<HashSet<&Point>> = Vec::new();
+    fn combine_best(self: &mut Self) -> PointPair {
+        let best = self.best_pairs.pop().unwrap().0;
 
-    for _ in 0..3 {
-        let best = best_pairs.pop().unwrap().0;
-        println!("best {:?}", best);
-
-        let mut inserted = false;
-        for c in &mut circuits {
-            if c.contains(best.0) || c.contains(best.1) {
-                c.insert(best.0);
-                c.insert(best.1);
-                inserted = true;
+        let mut set_indices = [0_usize; 2];
+        let mut idx = 0;
+        for (i, c) in &mut self.circuits.iter().enumerate() {
+            if c.contains(&best.0) {
+                set_indices[idx] = i;
+                idx += 1;
+            }
+            if c.contains(&best.1) {
+                set_indices[idx] = i;
+                idx += 1;
+            }
+            if idx == 2 {
                 break;
             }
         }
-        if !inserted {
-            circuits.push(HashSet::from([best.0, best.1]));
+
+        // Check if already in same circuit
+        if set_indices[0] == set_indices[1] {
+            return best;
         }
 
-        println!("circuits: {:?}", circuits);
+        // Remove the higher index
+        let mut second_set = self.circuits.swap_remove(set_indices[1]);
+
+        for p in second_set.drain() {
+            self.circuits[set_indices[0]].insert(p);
+        }
+
+        return best;
     }
 }
 
-pub fn day8(filename: &str) {
-    part1(filename);
+fn part1(filename: &str, is_sample: bool) {
+    let mut pg = Playground::new(filename);
+
+    let connection_count = if is_sample { 10 } else { 1000 };
+    for _ in 0..connection_count {
+        pg.combine_best();
+    }
+
+    // Final results
+    pg.circuits.sort_by(|a, b| b.len().cmp(&a.len()));
+    let result = pg.circuits[0].len() * pg.circuits[1].len() * pg.circuits[2].len();
+
+    println!("result: {}", result);
+}
+
+fn part2(filename: &str) {
+    let mut pg = Playground::new(filename);
+
+    let mut best = pg.best_pairs.peek().unwrap().0;
+    while pg.circuits.len() > 1 {
+        best = pg.combine_best();
+    }
+
+    println!("result: {}", best.0.0 * best.1.0);
+}
+
+pub fn day8(filename: &str, is_sample: bool) {
+    part1(filename, is_sample);
+    part2(filename);
 }
